@@ -1,0 +1,13 @@
+set(CISM_BINARY cism_test)
+file(GLOB_RECURSE CISM_TEST_SOURCES LIST_DIRECTORIES false cism*.cpp suite.cpp)
+set(CISM_SOURCES ${CISM_TEST_SOURCES} ../src/cism.cpp)
+add_executable(${CISM_BINARY} ${CISM_SOURCES})
+add_test(NAME ${CISM_BINARY} COMMAND ${CISM_BINARY})
+target_link_libraries(${CISM_BINARY} PUBLIC gtest nlohmann_json::nlohmann_json)
+
+set(SYSTEM_CALL_BINARY system_call_test)
+file(GLOB_RECURSE SYSTEM_CALL_TEST_SOURCES LIST_DIRECTORIES false system_call*.cpp suite.cpp)
+set(SYSTEM_CALL_SOURCES ${SYSTEM_CALL_TEST_SOURCES} ../src/system_call.cpp)
+add_executable(${SYSTEM_CALL_BINARY} ${SYSTEM_CALL_SOURCES})
+add_test(NAME ${SYSTEM_CALL_BINARY} COMMAND ${SYSTEM_CALL_BINARY})
+target_link_libraries(${SYSTEM_CALL_BINARY} PUBLIC gtest nlohmann_json::nlohmann_json)

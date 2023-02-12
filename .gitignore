@@ -1,0 +1,48 @@
+# Compiled files
+*.o
+*.out
+*.exe
+
+# Build artifacts
+bin/
+build/
+
+# Dependency files
+vendor/
+
+# Executables
+*.out
+*.exe
+
+# Compiled object files
+*.o
+*.obj
+
+# Generated files
+*.log
+*.class
+*.pyc
+
+# C++ specific
+*.d
+*.so
+*.a
+*.lib
+*.dll
+*.stackdump
+
+# Visual Studio files
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+# Temporary files
+*.bak
+*.tmp
+*.swp
+
+# vscode
+.vscode/
+
+# example
+.example/
