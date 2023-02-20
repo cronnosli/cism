@@ -60,6 +60,7 @@ jobs:
       - name: Testing
         run: |
           echo "Making test"
+          cd build
           make test
 
       - name: Perform CodeQL Analysis
