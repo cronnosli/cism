@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.10)
 project(cism)
 
 set(CPACK_PACKAGE_CONTACT "cronnosli@gmail.com")
@@ -16,6 +16,8 @@ set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://github.com/cronnosli/cism")
 set(CPACK_DEBIAN_PACKAGE_SECTION "devel")
 set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
 include(CPack)
+
+option(ENABLE_COVERAGE "Set building for coverage, all optimizations will be disabled" OFF)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

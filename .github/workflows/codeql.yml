@@ -47,6 +47,7 @@ jobs:
         run: |
           echo "Installing dependencies"
           sudo apt -y install nlohmann-json3-dev lcov libgtest-dev
+        shell: bash
       
       - name: Build
         run: |
@@ -54,14 +55,35 @@ jobs:
           rm -Rf build
           mkdir -p build
           cd build
-          cmake ..
-          make
+          cmake .. -DENABLE_COVERAGE=ON
+          make VERBOSE=1 --color=always
+        shell: bash
 
       - name: Testing
         run: |
           echo "Making test"
           cd build
           make test
+        shell: bash
+
+      - name: Coverage
+        run: |
+          cd build
+          make coverage
+        shell: bash
+
+      - name: Generating artifacts
+        run: |
+          zip -r build.zip build/coverage/ build/bin build/Testing
+          mkdir -p ${{github.workspace}}/artifacts
+          mv build.zip ${{github.workspace}}/artifacts/
+        shell: bash
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-artifacts
+          path: ${{github.workspace}}/artifacts/build.zip
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
