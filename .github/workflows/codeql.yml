@@ -74,16 +74,17 @@ jobs:
 
       - name: Generating artifacts
         run: |
-          zip -r build.zip build/coverage/ build/bin build/Testing
           mkdir -p ${{github.workspace}}/artifacts
-          mv build.zip ${{github.workspace}}/artifacts/
+          cp -r build/coverage ${{github.workspace}}/artifacts/
+          cp -r build/bin ${{github.workspace}}/artifacts/
+          cp -r build/Testing ${{github.workspace}}/artifacts/
         shell: bash
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: build-artifacts
-          path: ${{github.workspace}}/artifacts/build.zip
+          name: build
+          path: ${{github.workspace}}/artifacts/build/
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
