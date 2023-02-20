@@ -46,7 +46,7 @@ jobs:
       - name: Install dependencies
         run: |
           echo "Installing dependencies"
-          apt -y install nlohmann-json3-dev lcov libgtest-dev
+          sudo apt -y install nlohmann-json3-dev lcov libgtest-dev
       
       - name: Build
         run: |
