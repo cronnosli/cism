@@ -60,7 +60,7 @@ jobs:
       - name: Testing
         run: |
           echo "Making test"
-          make Test
+          make test
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
