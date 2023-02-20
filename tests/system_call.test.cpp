@@ -2,7 +2,6 @@
 #include <fstream>
 #include <cstring>
 #include <cstdio>
-#include <cjson/cJSON.h>
 #include <cism.h>
 #include <system_call.h>
 #include <cism_error.h>
