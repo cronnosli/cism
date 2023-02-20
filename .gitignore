@@ -6,6 +6,7 @@
 # Build artifacts
 bin/
 build/
+build*
 
 # Dependency files
 vendor/
