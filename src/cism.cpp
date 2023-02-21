@@ -18,16 +18,8 @@
 #define PATH_ENV_DELIMITER ':'
 #define PATH_ENV "PATH"
 
-console::Cism::Cism(execute::Call *call) : m_call(call)
+console::Cism::Cism(std::unique_ptr<execute::Call> &call) : m_call(std::move(call)), m_configJson(), m_scripts()
 {
-    m_configJson = nullptr;
-    m_scripts = nullptr;
-}
-
-console::Cism::~Cism()
-{
-    m_configJson = nullptr;
-    m_call = nullptr;
 }
 
 void console::Cism::validate(std::vector<std::string> &args)
