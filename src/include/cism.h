@@ -15,8 +15,8 @@ namespace console
     class Cism
     {
     public:
-        Cism(execute::Call *call);
-        ~Cism();
+        Cism(std::unique_ptr<execute::Call> &call);
+        ~Cism() = default;
         void validate(std::vector<std::string> &args);
         void run();
     private:
@@ -35,7 +35,7 @@ namespace console
         nlohmann::json m_configJson;
         nlohmann::json m_scripts;
 
-        execute::Call *m_call;
+        std::unique_ptr<execute::Call> m_call;
     };
 }
 

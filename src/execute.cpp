@@ -14,7 +14,7 @@ int main(int argc, char **argv)
     std::vector<std::string> args(argv, argv + argc);
     try
     {
-        execute::Call *call = new execute::SystemCall();
+        std::unique_ptr<execute::Call> call = std::make_unique<execute::SystemCall>();
         console::Cism cism(call);
         cism.validate(args);
         cism.run();
