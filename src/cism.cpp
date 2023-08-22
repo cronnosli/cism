@@ -7,22 +7,11 @@
 #include <constants.h>
 #include <cism_error.h>
 
-#define MINIMAL_ARGUMENTS 2
-#define SCRIPT_NAME_INDEX 1
-#define PARAMETER_INDEX 2
-#define SCRIPTS "scripts"
-#define SCRIPT "script"
-#define PATH "path"
-#define PATH_DELIMITER '/'
-#define PARAMETER_SEPARATOR " "
-#define PATH_ENV_DELIMITER ':'
-#define PATH_ENV "PATH"
-
-console::Cism::Cism(std::unique_ptr<execute::Call> &call) : m_call(std::move(call)), m_configJson(), m_scripts()
+console::Cism::Cism(std::unique_ptr<execute::Call>&& call) : m_call(std::move(call)), m_configJson(), m_scripts()
 {
 }
 
-void console::Cism::validate(std::vector<std::string> &args)
+void console::Cism::validate(std::vector<std::string>& args)
 {
     if (args.size() < MINIMAL_ARGUMENTS)
     {
@@ -37,11 +26,12 @@ void console::Cism::validate(std::vector<std::string> &args)
     {
         m_configFilePath = CISM_CONFIG_FILE_PATH;
     }
-
-    for (int i = PARAMETER_INDEX; i < args.size(); i++)
-    {
-        m_scriptParam += PARAMETER_SEPARATOR + args[i];
-    }
+    m_scriptParam = std::accumulate(
+        args.begin() + PARAMETER_INDEX, args.end(), std::string(),
+        [](const std::string& previous, const std::string& next) {
+            return previous + (previous.empty() ? "" : PARAMETER_SEPARATOR) + next;
+        }
+    );
 }
 
 void console::Cism::openConfigFile()
@@ -53,14 +43,14 @@ void console::Cism::openConfigFile()
     }
 }
 
-void console::Cism::parseConfigFile(std::ifstream &configFile)
+void console::Cism::parseConfigFile(std::ifstream& configFile)
 {
     std::string configContents((std::istreambuf_iterator<char>(configFile)), std::istreambuf_iterator<char>());
     try
     {
         m_configJson = nlohmann::json::parse(configContents);
     }
-    catch (const nlohmann::json::exception &e)
+    catch (const nlohmann::json::exception& e)
     {
         throw CismError(CISM_GET_ERROR(CISM_ERROR_FAILED_TO_PARSE, m_configFilePath));
     }
@@ -76,7 +66,7 @@ void console::Cism::findScript()
             throw CismError(CISM_GET_ERROR(CISM_ERROR_MISSING_SCRIPTS, m_configFilePath));
         }
     }
-    catch (nlohmann::json::exception &e)
+    catch (nlohmann::json::exception& e)
     {
         throw CismError(CISM_GET_ERROR(CISM_ERROR_MISSING_SCRIPTS, m_configFilePath));
     }
@@ -84,7 +74,7 @@ void console::Cism::findScript()
     {
         m_scriptStr = m_configJson.at(SCRIPTS).at(m_scriptName).get<std::string>();
     }
-    catch (nlohmann::json::exception &e)
+    catch (nlohmann::json::exception& e)
     {
         throw CismError(CISM_GET_ERROR(CISM_ERROR_SCRIPT_NOT_FOUND, m_scriptName));
     }
@@ -94,12 +84,20 @@ void console::Cism::findPath()
 {
     try
     {
-        m_pathStr = m_configJson.at(PATH).get<std::string>();        
+        m_pathStr = m_configJson.at(PATH).get<std::string>();
     }
-    catch (const nlohmann::json::exception &e)
+    catch (const nlohmann::json::exception& e)
     {
         throw CismError(CISM_GET_ERROR(CISM_ERROR_MISSING_PATH, m_configFilePath));
     }
+}
+
+bool console::Cism::isExecutableInPath(const std::string& program, std::vector<std::string>& directories)
+{
+    return std::any_of(directories.begin(), directories.end(), [&program](const std::string& dir) {
+        std::string filename = dir + PATH_DELIMITER + program;
+        return access(filename.c_str(), X_OK) == 0;
+    });
 }
 
 void console::Cism::buildCommand()
@@ -110,35 +108,28 @@ void console::Cism::buildCommand()
         return;
     }
 
-    char *path = getenv(PATH_ENV);
+    char* path = getenv(PATH_ENV);
     if (!path)
     {
         throw CismError(CISM_GET_ERROR(CISM_ERROR_MISSING_PATH_ENVIRONMENT, m_configFilePath));
     }
 
-    bool isSystemCommand = false;
+    std::string pathStr(path);
+    std::istringstream iss(pathStr);
     std::vector<std::string> directories;
-    char *p = path;
-    char *next = strchr(p, PATH_ENV_DELIMITER);
-    while (next)
-    {
-        directories.push_back(std::string(p, next - p));
-        p = next + 1;
-        next = strchr(p, PATH_ENV_DELIMITER);
-    }
-    directories.push_back(p);
+    std::string dir;
+    std::copy(std::istream_iterator<std::string>(iss),
+        std::istream_iterator<std::string>(),
+        std::back_inserter(directories));
+    std::string_view sv = m_scriptStr;
+    size_t spacePos = sv.find(' ');
+    std::string_view program = sv.substr(0, spacePos);
+    std::string_view param = (spacePos == std::string::npos) ? "" : sv.substr(spacePos + 1);
 
-    std::string program = m_scriptStr.substr(0, m_scriptStr.find(' '));
-    std::string param = m_scriptStr.substr(m_scriptStr.find(' ') + 1);
-
-    for (const std::string &dir : directories)
+    bool isSystemCommand = isExecutableInPath(program.data(), directories);
+    if (isSystemCommand)
     {
-        std::string filename = dir + PATH_DELIMITER + program;
-        if (access(filename.c_str(), X_OK) == 0)
-        {
-            m_scriptStr = filename + PARAMETER_SEPARATOR + param;
-            isSystemCommand = true;
-        }
+        m_scriptStr = directories.front() + PATH_DELIMITER + program.data() + PARAMETER_SEPARATOR + param.data();
     }
 
     m_command = (isSystemCommand ? m_scriptStr : m_pathStr + PATH_DELIMITER + m_scriptStr) + m_scriptParam;

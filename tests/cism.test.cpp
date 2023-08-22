@@ -28,7 +28,7 @@ protected:
     void createFile()
     {
         std::unique_ptr<execute::Call> call = std::make_unique<MockCall>();
-        cism = std::make_unique<console::Cism>(call);
+        cism = std::make_unique<console::Cism>(std::move(call));
         nlohmann::json configJson;
         nlohmann::json scripts;
         configJson["path"] = "scripts";

@@ -6,23 +6,37 @@
 #include <constants.h>
 #include <system_call.h>
 
-#define CISM_RETURN_SUCCESS 0
-#define CISM_RETURN_ERROR 1
-
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
+    if (argc < MINIMAL_ARGUMENTS) {
+        std::cerr << "Insufficient arguments provided.\n";
+        return CISM_RETURN_ERROR;
+    }
+
     std::vector<std::string> args(argv, argv + argc);
+
     try
     {
-        std::unique_ptr<execute::Call> call = std::make_unique<execute::SystemCall>();
-        console::Cism cism(call);
+        auto call = std::make_unique<execute::SystemCall>();
+        console::Cism cism(std::move(call));
         cism.validate(args);
         cism.run();
     }
-    catch (const CismError &e)
+    catch (const CismError& e)
     {
-        std::cerr << e.what() << std::endl;
+        std::cerr << "CISM Error: " << e.what() << std::endl;
         return CISM_RETURN_ERROR;
     }
-    return CISM_RETURN_SUCCESS; 
+    catch (const std::exception& e)
+    {
+        std::cerr << "Standard Error: " << e.what() << std::endl;
+        return CISM_RETURN_ERROR;
+    }
+    catch (...)
+    {
+        std::cerr << "Unknown Error Occurred.\n";
+        return CISM_RETURN_ERROR;
+    }
+
+    return CISM_RETURN_SUCCESS;
 }
