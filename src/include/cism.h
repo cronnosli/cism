@@ -15,16 +15,17 @@ namespace console
     class Cism
     {
     public:
-        Cism(std::unique_ptr<execute::Call> &call);
+        Cism(std::unique_ptr<execute::Call> &&);
         ~Cism() = default;
-        void validate(std::vector<std::string> &args);
+        void validate(std::vector<std::string> &);
         void run();
     private:
         void openConfigFile();
-        void parseConfigFile(std::ifstream &configFile);
+        void parseConfigFile(std::ifstream &);
         void findScript();
         void findPath();
         void buildCommand();
+        bool isExecutableInPath(const std::string&, std::vector<std::string>&); 
         std::string m_scriptName;
         std::string m_scriptParam;
         std::string m_configFilePath;

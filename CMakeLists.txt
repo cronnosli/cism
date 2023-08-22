@@ -18,6 +18,7 @@ set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
 include(CPack)
 
 option(ENABLE_COVERAGE "Set building for coverage, all optimizations will be disabled" OFF)
+option(ENABLE_DEBUG "Set building for debug with gdb" OFF)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -41,7 +42,9 @@ set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 find_package(nlohmann_json 3.2.0 REQUIRED)
 find_package(GTest REQUIRED)
 
-#add_test(NAME ExampleTest COMMAND ExampleTest)
+if(ENABLE_DEBUG)
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -ggdb")
+endif()
 
 if(ENABLE_COVERAGE)
   # set compiler flags
